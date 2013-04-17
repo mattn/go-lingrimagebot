@@ -62,7 +62,7 @@ func strWidth(str string) int {
 }
 
 func init() {
-	fontBytes, err := ioutil.ReadFile("Ricty-Regular.ttf")
+	fontBytes, err := ioutil.ReadFile("ipag-mona.ttf")
 	if err != nil {
 		log.Println(err)
 		return
