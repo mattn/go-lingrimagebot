@@ -62,12 +62,22 @@ func strWidth(str string) int {
 }
 
 func init() {
-	fontBytes, err := ioutil.ReadFile("ipag-mona.ttf")
+	fontBytes1, err := ioutil.ReadFile("ipag-mona.ttf")
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	font, err := freetype.ParseFont(fontBytes)
+	font1, err := freetype.ParseFont(fontBytes1)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fontBytes2, err := ioutil.ReadFile("ipagp-mona.ttf")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	font2, err := freetype.ParseFont(fontBytes2)
 	if err != nil {
 		log.Println(err)
 		return
@@ -90,7 +100,7 @@ func init() {
 				results := ""
 				for _, event := range status.Events {
 					tokens := strings.SplitN(event.Message.Text, " ", 2)
-					if tokens[0] == "!!image" {
+					if tokens[0] == "!!image" || tokens[0] == "!!image_p" {
 						lines := strings.Split(tokens[1], "\n")
 						maxWidth := 0
 						for _, line := range lines {
@@ -103,7 +113,11 @@ func init() {
 						draw.Draw(rgba, rgba.Bounds(), bg, image.ZP, draw.Src)
 						fc := freetype.NewContext()
 						fc.SetDPI(72)
-						fc.SetFont(font)
+						if tokens[0] == "!!image" {
+							fc.SetFont(font1)
+						} else {
+							fc.SetFont(font2)
+						}
 						fc.SetFontSize(21)
 						fc.SetClip(rgba.Bounds())
 						fc.SetDst(rgba)
