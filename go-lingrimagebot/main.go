@@ -13,9 +13,12 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 )
+
+var reToken = regexp.MustCompile(`^!!(image|image_p)\s((?:.|\n)*)`)
 
 type Status struct {
 	Events []Event `json:"events"`
@@ -99,9 +102,9 @@ func init() {
 				}
 				results := ""
 				for _, event := range status.Events {
-					tokens := strings.SplitN(event.Message.Text, " ", 2)
-					if tokens[0] == "!!image" || tokens[0] == "!!image_p" {
-						lines := strings.Split(tokens[1], "\n")
+					tokens := reToken.FindStringSubmatch(event.Message.Text)
+					if len(tokens) == 3 && (tokens[1] == "image" || tokens[1] == "image_p") {
+						lines := strings.Split(tokens[2], "\n")
 						maxWidth := 0
 						for _, line := range lines {
 							width := strWidth(line)
@@ -113,7 +116,7 @@ func init() {
 						draw.Draw(rgba, rgba.Bounds(), bg, image.ZP, draw.Src)
 						fc := freetype.NewContext()
 						fc.SetDPI(72)
-						if tokens[0] == "!!image" {
+						if tokens[1] == "image" {
 							fc.SetFont(font1)
 						} else {
 							fc.SetFont(font2)
