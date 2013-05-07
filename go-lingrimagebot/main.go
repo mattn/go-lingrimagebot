@@ -13,12 +13,14 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"time"
 )
 
 var reToken = regexp.MustCompile(`^!!(image|image_p)\s((?:.|\n)*)`)
+var reKomei = regexp.MustCompile(`^!(komei)\s((?:.|\n)*)`)
 
 type Status struct {
 	Events []Event `json:"events"`
@@ -134,6 +136,74 @@ func init() {
 								return
 							}
 							pt.Y += fc.PointToFix32(11 * 1.8)
+						}
+
+						var b bytes.Buffer
+						mp := multipart.NewWriter(&b)
+						err = mp.WriteField("id", time.Now().Format("20060102030405"))
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						part, err := mp.CreateFormFile("imagedata", "foo")
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						err = png.Encode(part, rgba)
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						err = mp.Close()
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						res, err := u.Post("http://gyazo.com/upload.cgi", mp.FormDataContentType(), bytes.NewReader(b.Bytes()))
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						defer res.Body.Close()
+						content, err := ioutil.ReadAll(res.Body)
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						gyazoUrl := string(content)
+						if len(gyazoUrl) > 4 && gyazoUrl[:5] == "http:" {
+							gyazoUrl += ".png"
+						}
+						results += gyazoUrl + "\n"
+					}
+
+					tokens = reKomei.FindStringSubmatch(event.Message.Text)
+					if len(tokens) == 3 && tokens[1] == "komei" {
+						lines := strings.Split(tokens[2], "\n")
+						pngf, _ := os.Open("komei.png")
+						pngi, _ := png.Decode(pngf)
+						rgba := image.NewRGBA(image.Rect(0, 0, pngi.Bounds().Dx(), pngi.Bounds().Dy()))
+						draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
+						fc := freetype.NewContext()
+						fc.SetDPI(72)
+						fc.SetFont(font1)
+						fc.SetFontSize(18)
+						fc.SetClip(rgba.Bounds())
+						fc.SetDst(rgba)
+						fc.SetSrc(fg)
+
+						pt := freetype.Pt(pngi.Bounds().Dx() - 25, 20)
+						for _, line := range lines {
+							for _, r := range []rune(line) {
+								_, err = fc.DrawString(string(r), pt)
+								if err != nil {
+									return
+								}
+								pt.Y += fc.PointToFix32(11 * 1.8)
+							}
+							pt.Y = fc.PointToFix32(20)
+							pt.X -= fc.PointToFix32(11 * 1.8)
 						}
 
 						var b bytes.Buffer
