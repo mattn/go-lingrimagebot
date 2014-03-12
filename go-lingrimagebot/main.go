@@ -173,7 +173,7 @@ func init() {
 							return
 						}
 						defer res.Body.Close()
-						if res.Status == 200 || res.Status == 201 {
+						if res.StatusCode == 200 || res.StatusCode == 201 {
 							content, err := ioutil.ReadAll(res.Body)
 							if err != nil {
 								c.Errorf("%s", e.Error())
@@ -243,7 +243,7 @@ func init() {
 							return
 						}
 						defer res.Body.Close()
-						if res.Status == 200 || res.Status == 201 {
+						if res.StatusCode == 200 || res.StatusCode == 201 {
 							content, err := ioutil.ReadAll(res.Body)
 							if err != nil {
 								c.Errorf("%s", e.Error())
@@ -310,7 +310,7 @@ func init() {
 							return
 						}
 						defer res.Body.Close()
-						if res.Status == 200 || res.Status == 201 {
+						if res.StatusCode == 200 || res.StatusCode == 201 {
 							content, err := ioutil.ReadAll(res.Body)
 							if err != nil {
 								c.Errorf("%s", e.Error())
