@@ -340,7 +340,7 @@ func init() {
 						fc.SetDst(rgba)
 						fc.SetSrc(image.Black)
 
-						pt := freetype.Pt(75, 30+int(fc.PointToFix32(21)>>8))
+						pt := freetype.Pt(70, 35+int(fc.PointToFix32(21)>>8))
 						for _, line := range lines {
 							_, err = fc.DrawString(line, pt)
 							if err != nil {
