@@ -23,6 +23,7 @@ import (
 var reToken = regexp.MustCompile(`^!!(image|image_p)\s((?:.|\n)*)`)
 var reKomei = regexp.MustCompile(`^!(komei)\s((?:.|\n)*)`)
 var reYuno = regexp.MustCompile(`^!(yuno)\s((?:.|\n)*)`)
+var reDeris = regexp.MustCompile(`^!(deris)\s((?:.|\n)*)`)
 
 type Status struct {
 	Events []Event `json:"events"`
@@ -273,6 +274,73 @@ func init() {
 						fc.SetSrc(image.White)
 
 						pt := freetype.Pt(25, 25+int(fc.PointToFix32(21)>>8))
+						for _, line := range lines {
+							_, err = fc.DrawString(line, pt)
+							if err != nil {
+								c.Errorf("%s", e.Error())
+								return
+							}
+							pt.Y += fc.PointToFix32(22 * 1.8)
+						}
+
+						var b bytes.Buffer
+						mp := multipart.NewWriter(&b)
+						err = mp.WriteField("id", time.Now().Format("20060102030405"))
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						part, err := mp.CreateFormFile("imagedata", "foo")
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						err = png.Encode(part, rgba)
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						err = mp.Close()
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						res, err := u.Post("http://gyazo.com/upload.cgi", mp.FormDataContentType(), bytes.NewReader(b.Bytes()))
+						if err != nil {
+							c.Errorf("%s", e.Error())
+							return
+						}
+						defer res.Body.Close()
+						if res.StatusCode == 200 || res.StatusCode == 201 {
+							content, err := ioutil.ReadAll(res.Body)
+							if err != nil {
+								c.Errorf("%s", e.Error())
+								return
+							}
+							gyazoUrl := string(content)
+							if len(gyazoUrl) > 4 && gyazoUrl[:5] == "http:" {
+								gyazoUrl += ".png"
+							}
+							results += gyazoUrl + "\n"
+						}
+					}
+
+					tokens = reDeris.FindStringSubmatch(event.Message.Text)
+					if len(tokens) == 3 && tokens[1] == "deris" {
+						lines := strings.Split(tokens[2], "\n")
+						pngf, _ := os.Open("deris.png")
+						pngi, _ := png.Decode(pngf)
+						rgba := image.NewRGBA(image.Rect(0, 0, pngi.Bounds().Dx(), pngi.Bounds().Dy()))
+						draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
+						fc := freetype.NewContext()
+						fc.SetDPI(72)
+						fc.SetFont(font1)
+						fc.SetFontSize(22)
+						fc.SetClip(rgba.Bounds())
+						fc.SetDst(rgba)
+						fc.SetSrc(image.Black)
+
+						pt := freetype.Pt(75, 30+int(fc.PointToFix32(21)>>8))
 						for _, line := range lines {
 							_, err = fc.DrawString(line, pt)
 							if err != nil {
