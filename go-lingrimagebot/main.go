@@ -4,6 +4,7 @@ import (
 	"appengine"
 	"appengine/urlfetch"
 	"bytes"
+	"code.google.com/p/draw2d/draw2d"
 	"code.google.com/p/freetype-go/freetype"
 	"encoding/json"
 	"fmt"
@@ -122,7 +123,7 @@ func init() {
 								maxWidth = width
 							}
 						}
-						rgba := image.NewRGBA(image.Rect(0, 0, maxWidth*11+10, len(lines)*20+20))
+						rgba := image.NewRGBA(image.Rect(0, 0, maxWidth*11+70, len(lines)*20+20))
 						draw.Draw(rgba, rgba.Bounds(), bg, image.ZP, draw.Src)
 						fc := freetype.NewContext()
 						fc.SetDPI(72)
@@ -328,14 +329,33 @@ func init() {
 					tokens = reDeris.FindStringSubmatch(event.Message.Text)
 					if len(tokens) == 3 && tokens[1] == "deris" {
 						lines := strings.Split(tokens[2], "\n")
+						maxWidth := 0
+						for _, line := range lines {
+							width := strWidth(line)
+							if maxWidth < width {
+								maxWidth = width
+							}
+						}
+						width := maxWidth*11+80
+						if width < 200 {
+							width = 200
+						}
 						pngf, _ := os.Open("deris.png")
 						pngi, _ := png.Decode(pngf)
-						rgba := image.NewRGBA(image.Rect(0, 0, pngi.Bounds().Dx(), pngi.Bounds().Dy()))
+						rgba := image.NewRGBA(image.Rect(0, 0, width, len(lines)*21+50))
 						draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
+						gc := draw2d.NewGraphicContext(rgba)
+						gc.SetStrokeColor(image.Black)
+						gc.MoveTo(0, 0)
+						gc.LineTo(float64(rgba.Bounds().Dx())-1, 0)
+						gc.LineTo(float64(rgba.Bounds().Dx())-1, float64(rgba.Bounds().Dy())-1)
+						gc.LineTo(0, float64(rgba.Bounds().Dy())-1)
+						gc.LineTo(0, 0)
+						gc.Stroke()
 						fc := freetype.NewContext()
 						fc.SetDPI(72)
 						fc.SetFont(font1)
-						fc.SetFontSize(22)
+						fc.SetFontSize(21)
 						fc.SetClip(rgba.Bounds())
 						fc.SetDst(rgba)
 						fc.SetSrc(image.Black)
@@ -347,7 +367,7 @@ func init() {
 								c.Errorf("%s", e.Error())
 								return
 							}
-							pt.Y += fc.PointToFix32(22 * 1.8)
+							pt.Y += fc.PointToFix32(11 * 1.8)
 						}
 
 						var b bytes.Buffer
