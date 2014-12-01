@@ -346,12 +346,23 @@ func init() {
 						draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
 						gc := draw2d.NewGraphicContext(rgba)
 						gc.SetStrokeColor(image.Black)
+						gc.SetFillColor(image.White)
+						pt := draw2d.PathStorage{}
+						gc.MoveTo(0, 0)
+						gc.LineTo(float64(rgba.Bounds().Dx())-1, 0)
+						gc.LineTo(float64(rgba.Bounds().Dx())-1, float64(rgba.Bounds().Dy())-1)
+						gc.LineTo(0, float64(rgba.Bounds().Dy())-1)
+						gc.LineTo(0, 0)
+						pt.Close()
+						gc.Fill(pt.Close())
+						/*
 						gc.MoveTo(0, 0)
 						gc.LineTo(float64(rgba.Bounds().Dx())-1, 0)
 						gc.LineTo(float64(rgba.Bounds().Dx())-1, float64(rgba.Bounds().Dy())-1)
 						gc.LineTo(0, float64(rgba.Bounds().Dy())-1)
 						gc.LineTo(0, 0)
 						gc.Stroke()
+						*/
 						fc := freetype.NewContext()
 						fc.SetDPI(72)
 						fc.SetFont(font1)
