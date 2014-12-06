@@ -72,7 +72,7 @@ func strWidth(str string) int {
 }
 
 func init() {
-	fontBytes1, err := ioutil.ReadFile("ipag-mona.ttf")
+	fontBytes1, err := ioutil.ReadFile("font/ipag-mona.ttf")
 	if err != nil {
 		log.Println(err)
 		return
@@ -82,7 +82,7 @@ func init() {
 		log.Println(err)
 		return
 	}
-	fontBytes2, err := ioutil.ReadFile("ipagp-mona.ttf")
+	fontBytes2, err := ioutil.ReadFile("font/ipagp-mona.ttf")
 	if err != nil {
 		log.Println(err)
 		return
@@ -193,7 +193,7 @@ func init() {
 					tokens = reKomei.FindStringSubmatch(event.Message.Text)
 					if len(tokens) == 3 && tokens[1] == "komei" {
 						lines := strings.Split(strings.Replace(tokens[2], "ー", "｜", -1), "\n")
-						pngf, _ := os.Open("komei.png")
+						pngf, _ := os.Open("image/komei.png")
 						pngi, _ := png.Decode(pngf)
 						rgba := image.NewRGBA(image.Rect(0, 0, pngi.Bounds().Dx(), pngi.Bounds().Dy()))
 						draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
@@ -263,7 +263,7 @@ func init() {
 					tokens = reYuno.FindStringSubmatch(event.Message.Text)
 					if len(tokens) == 3 && tokens[1] == "yuno" {
 						lines := strings.Split(tokens[2], "\n")
-						pngf, _ := os.Open("yuno.png")
+						pngf, _ := os.Open("image/yuno.png")
 						pngi, _ := png.Decode(pngf)
 						rgba := image.NewRGBA(image.Rect(0, 0, pngi.Bounds().Dx(), pngi.Bounds().Dy()))
 						draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
@@ -341,7 +341,7 @@ func init() {
 						if width < 200 {
 							width = 200
 						}
-						pngf, _ := os.Open("deris.png")
+						pngf, _ := os.Open("image/deris.png")
 						pngi, _ := png.Decode(pngf)
 						rgba := image.NewRGBA(image.Rect(0, 0, width, len(lines)*21+50))
 						gc := draw2d.NewGraphicContext(rgba)
@@ -419,7 +419,7 @@ func init() {
 					tokens = reGolgo.FindStringSubmatch(event.Message.Text)
 					if len(tokens) == 3 && tokens[1] == "golgo" {
 						lines := strings.Split(strings.Replace(tokens[2], "ー", "｜", -1), "\n")
-						pngf, _ := os.Open("golgo.png")
+						pngf, _ := os.Open("image/golgo.png")
 						pngi, _ := png.Decode(pngf)
 						rgba := image.NewRGBA(image.Rect(0, 0, pngi.Bounds().Dx(), pngi.Bounds().Dy()))
 						draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
