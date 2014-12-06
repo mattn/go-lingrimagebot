@@ -345,7 +345,6 @@ func init() {
 						pngi, _ := png.Decode(pngf)
 						rgba := image.NewRGBA(image.Rect(0, 0, width, len(lines)*21+50))
 						gc := draw2d.NewGraphicContext(rgba)
-						gc.SetStrokeColor(image.Black)
 						gc.SetFillColor(image.White)
 						paths := &draw2d.PathStorage{}
 						paths.MoveTo(0, 0)
@@ -355,6 +354,7 @@ func init() {
 						paths.LineTo(0, 0)
 						gc.Fill(paths.Close())
 						draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
+						gc.SetStrokeColor(image.Black)
 						gc.Stroke(paths.Close())
 						fc := freetype.NewContext()
 						fc.SetDPI(72)

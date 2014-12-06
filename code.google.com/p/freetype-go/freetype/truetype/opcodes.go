@@ -5,9 +5,8 @@
 
 package truetype
 
-// The Truetype opcodes are summarized at https://developer.apple.com/fonts/TTRefMan/RM07/appendixA.html
-
-// TODO: the opXXX constants without end-of-line comments are not yet implemented.
+// The Truetype opcodes are summarized at
+// https://developer.apple.com/fonts/TTRefMan/RM07/appendixA.html
 
 const (
 	opSVTCA0    = 0x00 // Set freedom and projection Vectors To Coordinate Axis
@@ -16,32 +15,32 @@ const (
 	opSPVTCA1   = 0x03 // .
 	opSFVTCA0   = 0x04 // Set Freedom Vector to Coordinate Axis
 	opSFVTCA1   = 0x05 // .
-	opSPVTL0    = 0x06
-	opSPVTL1    = 0x07
-	opSFVTL0    = 0x08
-	opSFVTL1    = 0x09
+	opSPVTL0    = 0x06 // Set Projection Vector To Line
+	opSPVTL1    = 0x07 // .
+	opSFVTL0    = 0x08 // Set Freedom Vector To Line
+	opSFVTL1    = 0x09 // .
 	opSPVFS     = 0x0a // Set Projection Vector From Stack
 	opSFVFS     = 0x0b // Set Freedom Vector From Stack
 	opGPV       = 0x0c // Get Projection Vector
 	opGFV       = 0x0d // Get Freedom Vector
 	opSFVTPV    = 0x0e // Set Freedom Vector To Projection Vector
-	opISECT     = 0x0f
-	opSRP0      = 0x10
-	opSRP1      = 0x11
-	opSRP2      = 0x12
-	opSZP0      = 0x13
-	opSZP1      = 0x14
-	opSZP2      = 0x15
-	opSZPS      = 0x16
+	opISECT     = 0x0f // moves point p to the InterSECTion of two lines
+	opSRP0      = 0x10 // Set Reference Point 0
+	opSRP1      = 0x11 // Set Reference Point 1
+	opSRP2      = 0x12 // Set Reference Point 2
+	opSZP0      = 0x13 // Set Zone Pointer 0
+	opSZP1      = 0x14 // Set Zone Pointer 1
+	opSZP2      = 0x15 // Set Zone Pointer 2
+	opSZPS      = 0x16 // Set Zone PointerS
 	opSLOOP     = 0x17 // Set LOOP variable
 	opRTG       = 0x18 // Round To Grid
 	opRTHG      = 0x19 // Round To Half Grid
 	opSMD       = 0x1a // Set Minimum Distance
 	opELSE      = 0x1b // ELSE clause
 	opJMPR      = 0x1c // JuMP Relative
-	opSCVTCI    = 0x1d
-	opSSWCI     = 0x1e
-	opSSW       = 0x1f
+	opSCVTCI    = 0x1d // Set Control Value Table Cut-In
+	opSSWCI     = 0x1e // Set Single Width Cut-In
+	opSSW       = 0x1f // Set Single Width
 	opDUP       = 0x20 // DUPlicate top stack element
 	opPOP       = 0x21 // POP top stack element
 	opCLEAR     = 0x22 // CLEAR the stack
@@ -49,46 +48,46 @@ const (
 	opDEPTH     = 0x24 // DEPTH of the stack
 	opCINDEX    = 0x25 // Copy the INDEXed element to the top of the stack
 	opMINDEX    = 0x26 // Move the INDEXed element to the top of the stack
-	opALIGNPTS  = 0x27
-	op_0x28     = 0x28
-	opUTP       = 0x29
-	opLOOPCALL  = 0x2a
-	opCALL      = 0x2b
-	opFDEF      = 0x2c
-	opENDF      = 0x2d
-	opMDAP0     = 0x2e
-	opMDAP1     = 0x2f
-	opIUP0      = 0x30
-	opIUP1      = 0x31
-	opSHP0      = 0x32
-	opSHP1      = 0x33
-	opSHC0      = 0x34
-	opSHC1      = 0x35
-	opSHZ0      = 0x36
-	opSHZ1      = 0x37
-	opSHPIX     = 0x38
-	opIP        = 0x39
-	opMSIRP0    = 0x3a
-	opMSIRP1    = 0x3b
-	opALIGNRP   = 0x3c
+	opALIGNPTS  = 0x27 // ALIGN PoinTS
+	op_0x28     = 0x28 // deprecated
+	opUTP       = 0x29 // UnTouch Point
+	opLOOPCALL  = 0x2a // LOOP and CALL function
+	opCALL      = 0x2b // CALL function
+	opFDEF      = 0x2c // Function DEFinition
+	opENDF      = 0x2d // END Function definition
+	opMDAP0     = 0x2e // Move Direct Absolute Point
+	opMDAP1     = 0x2f // .
+	opIUP0      = 0x30 // Interpolate Untouched Points through the outline
+	opIUP1      = 0x31 // .
+	opSHP0      = 0x32 // SHift Point using reference point
+	opSHP1      = 0x33 // .
+	opSHC0      = 0x34 // SHift Contour using reference point
+	opSHC1      = 0x35 // .
+	opSHZ0      = 0x36 // SHift Zone using reference point
+	opSHZ1      = 0x37 // .
+	opSHPIX     = 0x38 // SHift point by a PIXel amount
+	opIP        = 0x39 // Interpolate Point
+	opMSIRP0    = 0x3a // Move Stack Indirect Relative Point
+	opMSIRP1    = 0x3b // .
+	opALIGNRP   = 0x3c // ALIGN to Reference Point
 	opRTDG      = 0x3d // Round To Double Grid
-	opMIAP0     = 0x3e
-	opMIAP1     = 0x3f
+	opMIAP0     = 0x3e // Move Indirect Absolute Point
+	opMIAP1     = 0x3f // .
 	opNPUSHB    = 0x40 // PUSH N Bytes
 	opNPUSHW    = 0x41 // PUSH N Words
 	opWS        = 0x42 // Write Store
 	opRS        = 0x43 // Read Store
-	opWCVTP     = 0x44
-	opRCVT      = 0x45
-	opGC0       = 0x46
-	opGC1       = 0x47
-	opSCFS      = 0x48
-	opMD0       = 0x49
-	opMD1       = 0x4a
-	opMPPEM     = 0x4b
-	opMPS       = 0x4c
-	opFLIPON    = 0x4d
-	opFLIPOFF   = 0x4e
+	opWCVTP     = 0x44 // Write Control Value Table in Pixel units
+	opRCVT      = 0x45 // Read Control Value Table entry
+	opGC0       = 0x46 // Get Coordinate projected onto the projection vector
+	opGC1       = 0x47 // .
+	opSCFS      = 0x48 // Sets Coordinate From the Stack using projection vector and freedom vector
+	opMD0       = 0x49 // Measure Distance
+	opMD1       = 0x4a // .
+	opMPPEM     = 0x4b // Measure Pixels Per EM
+	opMPS       = 0x4c // Measure Point Size
+	opFLIPON    = 0x4d // set the auto FLIP Boolean to ON
+	opFLIPOFF   = 0x4e // set the auto FLIP Boolean to OFF
 	opDEBUG     = 0x4f // DEBUG call
 	opLT        = 0x50 // Less Than
 	opLTEQ      = 0x51 // Less Than or EQual
@@ -103,9 +102,9 @@ const (
 	opAND       = 0x5a // logical AND
 	opOR        = 0x5b // logical OR
 	opNOT       = 0x5c // logical NOT
-	opDELTAP1   = 0x5d
-	opSDB       = 0x5e
-	opSDS       = 0x5f
+	opDELTAP1   = 0x5d // DELTA exception P1
+	opSDB       = 0x5e // Set Delta Base in the graphics state
+	opSDS       = 0x5f // Set Delta Shift in the graphics state
 	opADD       = 0x60 // ADD
 	opSUB       = 0x61 // SUBtract
 	opDIV       = 0x62 // DIVide
@@ -122,37 +121,37 @@ const (
 	opNROUND01  = 0x6d // .
 	opNROUND10  = 0x6e // .
 	opNROUND11  = 0x6f // .
-	opWCVTF     = 0x70
-	opDELTAP2   = 0x71
-	opDELTAP3   = 0x72
-	opDELTAC1   = 0x73
-	opDELTAC2   = 0x74
-	opDELTAC3   = 0x75
+	opWCVTF     = 0x70 // Write Control Value Table in Funits
+	opDELTAP2   = 0x71 // DELTA exception P2
+	opDELTAP3   = 0x72 // DELTA exception P3
+	opDELTAC1   = 0x73 // DELTA exception C1
+	opDELTAC2   = 0x74 // DELTA exception C2
+	opDELTAC3   = 0x75 // DELTA exception C3
 	opSROUND    = 0x76 // Super ROUND
 	opS45ROUND  = 0x77 // Super ROUND 45 degrees
 	opJROT      = 0x78 // Jump Relative On True
 	opJROF      = 0x79 // Jump Relative On False
 	opROFF      = 0x7a // Round OFF
-	op_0x7b     = 0x7b
+	op_0x7b     = 0x7b // deprecated
 	opRUTG      = 0x7c // Round Up To Grid
 	opRDTG      = 0x7d // Round Down To Grid
 	opSANGW     = 0x7e // Set ANGle Weight
 	opAA        = 0x7f // Adjust Angle
-	opFLIPPT    = 0x80
-	opFLIPRGON  = 0x81
-	opFLIPRGOFF = 0x82
-	op_0x83     = 0x83
-	op_0x84     = 0x84
-	opSCANCTRL  = 0x85
-	opSDPVTL0   = 0x86
-	opSDPVTL1   = 0x87
-	opGETINFO   = 0x88
+	opFLIPPT    = 0x80 // FLIP PoinT
+	opFLIPRGON  = 0x81 // FLIP RanGe ON
+	opFLIPRGOFF = 0x82 // FLIP RanGe OFF
+	op_0x83     = 0x83 // deprecated
+	op_0x84     = 0x84 // deprecated
+	opSCANCTRL  = 0x85 // SCAN conversion ConTRoL
+	opSDPVTL0   = 0x86 // Set Dual Projection Vector To Line
+	opSDPVTL1   = 0x87 // .
+	opGETINFO   = 0x88 // GET INFOrmation
 	opIDEF      = 0x89 // Instruction DEFinition
 	opROLL      = 0x8a // ROLL the top three stack elements
 	opMAX       = 0x8b // MAXimum of top two stack elements
 	opMIN       = 0x8c // MINimum of top two stack elements
-	opSCANTYPE  = 0x8d
-	opINSTCTRL  = 0x8e
+	opSCANTYPE  = 0x8d // SCANTYPE
+	opINSTCTRL  = 0x8e // INSTRuction execution ConTRoL
 	op_0x8f     = 0x8f
 	op_0x90     = 0x90
 	op_0x91     = 0x91
@@ -202,92 +201,89 @@ const (
 	opPUSHW101  = 0xbd // .
 	opPUSHW110  = 0xbe // .
 	opPUSHW111  = 0xbf // .
-	opMDRP00000 = 0xc0
-	opMDRP00001 = 0xc1
-	opMDRP00010 = 0xc2
-	opMDRP00011 = 0xc3
-	opMDRP00100 = 0xc4
-	opMDRP00101 = 0xc5
-	opMDRP00110 = 0xc6
-	opMDRP00111 = 0xc7
-	opMDRP01000 = 0xc8
-	opMDRP01001 = 0xc9
-	opMDRP01010 = 0xca
-	opMDRP01011 = 0xcb
-	opMDRP01100 = 0xcc
-	opMDRP01101 = 0xcd
-	opMDRP01110 = 0xce
-	opMDRP01111 = 0xcf
-	opMDRP10000 = 0xd0
-	opMDRP10001 = 0xd1
-	opMDRP10010 = 0xd2
-	opMDRP10011 = 0xd3
-	opMDRP10100 = 0xd4
-	opMDRP10101 = 0xd5
-	opMDRP10110 = 0xd6
-	opMDRP10111 = 0xd7
-	opMDRP11000 = 0xd8
-	opMDRP11001 = 0xd9
-	opMDRP11010 = 0xda
-	opMDRP11011 = 0xdb
-	opMDRP11100 = 0xdd
-	opMDRP11101 = 0xdc
-	opMDRP11110 = 0xde
-	opMDRP11111 = 0xdf
-	opMIRP00000 = 0xe0
-	opMIRP00001 = 0xe1
-	opMIRP00010 = 0xe2
-	opMIRP00011 = 0xe3
-	opMIRP00100 = 0xe4
-	opMIRP00101 = 0xe5
-	opMIRP00110 = 0xe6
-	opMIRP00111 = 0xe7
-	opMIRP01000 = 0xe8
-	opMIRP01001 = 0xe9
-	opMIRP01010 = 0xea
-	opMIRP01011 = 0xeb
-	opMIRP01100 = 0xec
-	opMIRP01101 = 0xed
-	opMIRP01110 = 0xee
-	opMIRP01111 = 0xef
-	opMIRP10000 = 0xf0
-	opMIRP10001 = 0xf1
-	opMIRP10010 = 0xf2
-	opMIRP10011 = 0xf3
-	opMIRP10100 = 0xf4
-	opMIRP10101 = 0xf5
-	opMIRP10110 = 0xf6
-	opMIRP10111 = 0xf7
-	opMIRP11000 = 0xf8
-	opMIRP11001 = 0xf9
-	opMIRP11010 = 0xfa
-	opMIRP11011 = 0xfb
-	opMIRP11100 = 0xfd
-	opMIRP11101 = 0xfc
-	opMIRP11110 = 0xfe
-	opMIRP11111 = 0xff
+	opMDRP00000 = 0xc0 // Move Direct Relative Point
+	opMDRP00001 = 0xc1 // .
+	opMDRP00010 = 0xc2 // .
+	opMDRP00011 = 0xc3 // .
+	opMDRP00100 = 0xc4 // .
+	opMDRP00101 = 0xc5 // .
+	opMDRP00110 = 0xc6 // .
+	opMDRP00111 = 0xc7 // .
+	opMDRP01000 = 0xc8 // .
+	opMDRP01001 = 0xc9 // .
+	opMDRP01010 = 0xca // .
+	opMDRP01011 = 0xcb // .
+	opMDRP01100 = 0xcc // .
+	opMDRP01101 = 0xcd // .
+	opMDRP01110 = 0xce // .
+	opMDRP01111 = 0xcf // .
+	opMDRP10000 = 0xd0 // .
+	opMDRP10001 = 0xd1 // .
+	opMDRP10010 = 0xd2 // .
+	opMDRP10011 = 0xd3 // .
+	opMDRP10100 = 0xd4 // .
+	opMDRP10101 = 0xd5 // .
+	opMDRP10110 = 0xd6 // .
+	opMDRP10111 = 0xd7 // .
+	opMDRP11000 = 0xd8 // .
+	opMDRP11001 = 0xd9 // .
+	opMDRP11010 = 0xda // .
+	opMDRP11011 = 0xdb // .
+	opMDRP11100 = 0xdc // .
+	opMDRP11101 = 0xdd // .
+	opMDRP11110 = 0xde // .
+	opMDRP11111 = 0xdf // .
+	opMIRP00000 = 0xe0 // Move Indirect Relative Point
+	opMIRP00001 = 0xe1 // .
+	opMIRP00010 = 0xe2 // .
+	opMIRP00011 = 0xe3 // .
+	opMIRP00100 = 0xe4 // .
+	opMIRP00101 = 0xe5 // .
+	opMIRP00110 = 0xe6 // .
+	opMIRP00111 = 0xe7 // .
+	opMIRP01000 = 0xe8 // .
+	opMIRP01001 = 0xe9 // .
+	opMIRP01010 = 0xea // .
+	opMIRP01011 = 0xeb // .
+	opMIRP01100 = 0xec // .
+	opMIRP01101 = 0xed // .
+	opMIRP01110 = 0xee // .
+	opMIRP01111 = 0xef // .
+	opMIRP10000 = 0xf0 // .
+	opMIRP10001 = 0xf1 // .
+	opMIRP10010 = 0xf2 // .
+	opMIRP10011 = 0xf3 // .
+	opMIRP10100 = 0xf4 // .
+	opMIRP10101 = 0xf5 // .
+	opMIRP10110 = 0xf6 // .
+	opMIRP10111 = 0xf7 // .
+	opMIRP11000 = 0xf8 // .
+	opMIRP11001 = 0xf9 // .
+	opMIRP11010 = 0xfa // .
+	opMIRP11011 = 0xfb // .
+	opMIRP11100 = 0xfc // .
+	opMIRP11101 = 0xfd // .
+	opMIRP11110 = 0xfe // .
+	opMIRP11111 = 0xff // .
 )
 
 // popCount is the number of stack elements that each opcode pops.
 var popCount = [256]uint8{
 	// 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, f
-	0, 0, 0, 0, 0, 0, q, q, q, q, 2, 2, 0, 0, 0, q, // 0x00 - 0x0f
-	q, q, q, q, q, q, q, 1, 0, 0, 1, 0, 1, q, q, q, // 0x10 - 0x1f
-	1, 1, 0, 2, 0, 1, 1, q, q, q, q, q, q, q, q, q, // 0x20 - 0x2f
-	q, q, q, q, q, q, q, q, q, q, q, q, q, 0, q, q, // 0x30 - 0x3f
-	0, 0, 2, 1, q, q, q, q, q, q, q, q, q, q, q, 0, // 0x40 - 0x4f
-	2, 2, 2, 2, 2, 2, 1, 1, 1, 0, 2, 2, 1, q, q, q, // 0x50 - 0x5f
+	0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 5, // 0x00 - 0x0f
+	1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, // 0x10 - 0x1f
+	1, 1, 0, 2, 0, 1, 1, 2, 0, 1, 2, 1, 1, 0, 1, 1, // 0x20 - 0x2f
+	0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 2, 2, 0, 0, 2, 2, // 0x30 - 0x3f
+	0, 0, 2, 1, 2, 1, 1, 1, 2, 2, 2, 0, 0, 0, 0, 0, // 0x40 - 0x4f
+	2, 2, 2, 2, 2, 2, 1, 1, 1, 0, 2, 2, 1, 1, 1, 1, // 0x50 - 0x5f
 	2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x60 - 0x6f
-	q, q, q, q, q, q, 1, 1, 2, 2, 0, q, 0, 0, 1, 1, // 0x70 - 0x7f
-	q, q, q, q, q, q, q, q, q, 1, 3, 2, 2, q, q, q, // 0x80 - 0x8f
-	q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, // 0x90 - 0x9f
-	q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, // 0xa0 - 0xaf
+	2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 0, 0, 0, 0, 1, 1, // 0x70 - 0x7f
+	0, 2, 2, 0, 0, 1, 2, 2, 1, 1, 3, 2, 2, 1, 2, 0, // 0x80 - 0x8f
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x90 - 0x9f
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0xa0 - 0xaf
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0xb0 - 0xbf
-	q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, // 0xc0 - 0xcf
-	q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, // 0xd0 - 0xdf
-	q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, // 0xe0 - 0xef
-	q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, q, // 0xf0 - 0xff
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0xc0 - 0xcf
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0xd0 - 0xdf
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, // 0xe0 - 0xef
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, // 0xf0 - 0xff
 }
-
-// popCount[opcode] == q means that that opcode is not yet implemented.
-const q = 255

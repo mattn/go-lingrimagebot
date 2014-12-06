@@ -33,8 +33,12 @@ type Bounds struct {
 
 // An HMetric holds the horizontal metrics of a single glyph.
 type HMetric struct {
-	AdvanceWidth    int32
-	LeftSideBearing int32
+	AdvanceWidth, LeftSideBearing int32
+}
+
+// A VMetric holds the vertical metrics of a single glyph.
+type VMetric struct {
+	AdvanceHeight, TopSideBearing int32
 }
 
 // A FormatError reports that the input is not a valid TrueType font.
@@ -87,15 +91,16 @@ const (
 
 // A cm holds a parsed cmap entry.
 type cm struct {
-	start, end, delta, offset uint16
+	start, end, delta, offset uint32
 }
 
 // A Font represents a Truetype font.
 type Font struct {
 	// Tables sliced from the TTF data. The different tables are documented
 	// at http://developer.apple.com/fonts/TTRefMan/RM06/Chap6.html
-	cmap, glyf, head, hhea, hmtx, kern, loca, maxp []byte
-	cmapIndexes                                    []byte
+	cmap, cvt, fpgm, glyf, hdmx, head, hhea, hmtx, kern, loca, maxp, os2, prep, vmtx []byte
+
+	cmapIndexes []byte
 
 	// Cached values derived from the raw ttf data.
 	cm                      []cm
@@ -110,12 +115,16 @@ type Font struct {
 func (f *Font) parseCmap() error {
 	const (
 		cmapFormat4         = 4
+		cmapFormat12        = 12
 		languageIndependent = 0
 
 		// A 32-bit encoding consists of a most-significant 16-bit Platform ID and a
-		// least-significant 16-bit Platform Specific ID.
-		unicodeEncoding   = 0x00000003 // PID = 0 (Unicode), PSID = 3 (Unicode 2.0)
-		microsoftEncoding = 0x00030001 // PID = 3 (Microsoft), PSID = 1 (UCS-2)
+		// least-significant 16-bit Platform Specific ID. The magic numbers are
+		// specified at https://www.microsoft.com/typography/otspec/name.htm
+		unicodeEncoding         = 0x00000003 // PID = 0 (Unicode), PSID = 3 (Unicode 2.0)
+		microsoftSymbolEncoding = 0x00030000 // PID = 3 (Microsoft), PSID = 0 (Symbol)
+		microsoftUCS2Encoding   = 0x00030001 // PID = 3 (Microsoft), PSID = 1 (UCS-2)
+		microsoftUCS4Encoding   = 0x0003000a // PID = 3 (Microsoft), PSID = 10 (UCS-4)
 	)
 
 	if len(f.cmap) < 4 {
@@ -136,7 +145,11 @@ func (f *Font) parseCmap() error {
 		if pidPsid == unicodeEncoding {
 			offset, found = int(o), true
 			break
-		} else if pidPsid == microsoftEncoding {
+
+		} else if pidPsid == microsoftSymbolEncoding ||
+			pidPsid == microsoftUCS2Encoding ||
+			pidPsid == microsoftUCS4Encoding {
+
 			offset, found = int(o), true
 			// We don't break out of the for loop, so that Unicode can override Microsoft.
 		}
@@ -149,39 +162,63 @@ func (f *Font) parseCmap() error {
 	}
 
 	cmapFormat := u16(f.cmap, offset)
-	if cmapFormat != cmapFormat4 {
-		return UnsupportedError(fmt.Sprintf("cmap format: %d", cmapFormat))
-	}
-	language := u16(f.cmap, offset+4)
-	if language != languageIndependent {
-		return UnsupportedError(fmt.Sprintf("language: %d", language))
-	}
-	segCountX2 := int(u16(f.cmap, offset+6))
-	if segCountX2%2 == 1 {
-		return FormatError(fmt.Sprintf("bad segCountX2: %d", segCountX2))
-	}
-	segCount := segCountX2 / 2
-	offset += 14
-	f.cm = make([]cm, segCount)
-	for i := 0; i < segCount; i++ {
-		f.cm[i].end = u16(f.cmap, offset)
+	switch cmapFormat {
+	case cmapFormat4:
+		language := u16(f.cmap, offset+4)
+		if language != languageIndependent {
+			return UnsupportedError(fmt.Sprintf("language: %d", language))
+		}
+		segCountX2 := int(u16(f.cmap, offset+6))
+		if segCountX2%2 == 1 {
+			return FormatError(fmt.Sprintf("bad segCountX2: %d", segCountX2))
+		}
+		segCount := segCountX2 / 2
+		offset += 14
+		f.cm = make([]cm, segCount)
+		for i := 0; i < segCount; i++ {
+			f.cm[i].end = uint32(u16(f.cmap, offset))
+			offset += 2
+		}
 		offset += 2
+		for i := 0; i < segCount; i++ {
+			f.cm[i].start = uint32(u16(f.cmap, offset))
+			offset += 2
+		}
+		for i := 0; i < segCount; i++ {
+			f.cm[i].delta = uint32(u16(f.cmap, offset))
+			offset += 2
+		}
+		for i := 0; i < segCount; i++ {
+			f.cm[i].offset = uint32(u16(f.cmap, offset))
+			offset += 2
+		}
+		f.cmapIndexes = f.cmap[offset:]
+		return nil
+
+	case cmapFormat12:
+		if u16(f.cmap, offset+2) != 0 {
+			return FormatError(fmt.Sprintf("cmap format: % x", f.cmap[offset:offset+4]))
+		}
+		length := u32(f.cmap, offset+4)
+		language := u32(f.cmap, offset+8)
+		if language != languageIndependent {
+			return UnsupportedError(fmt.Sprintf("language: %d", language))
+		}
+		nGroups := u32(f.cmap, offset+12)
+		if length != 12*nGroups+16 {
+			return FormatError("inconsistent cmap length")
+		}
+		offset += 16
+		f.cm = make([]cm, nGroups)
+		for i := uint32(0); i < nGroups; i++ {
+			f.cm[i].start = u32(f.cmap, offset+0)
+			f.cm[i].end = u32(f.cmap, offset+4)
+			f.cm[i].delta = u32(f.cmap, offset+8) - f.cm[i].start
+			offset += 12
+		}
+		return nil
 	}
-	offset += 2
-	for i := 0; i < segCount; i++ {
-		f.cm[i].start = u16(f.cmap, offset)
-		offset += 2
-	}
-	for i := 0; i < segCount; i++ {
-		f.cm[i].delta = u16(f.cmap, offset)
-		offset += 2
-	}
-	for i := 0; i < segCount; i++ {
-		f.cm[i].offset = u16(f.cmap, offset)
-		offset += 2
-	}
-	f.cmapIndexes = f.cmap[offset:]
-	return nil
+	return UnsupportedError(fmt.Sprintf("cmap format: %d", cmapFormat))
 }
 
 func (f *Font) parseHead() error {
@@ -295,37 +332,91 @@ func (f *Font) FUnitsPerEm() int32 {
 
 // Index returns a Font's index for the given rune.
 func (f *Font) Index(x rune) Index {
-	c := uint16(x)
-	n := len(f.cm)
-	for i := 0; i < n; i++ {
-		if f.cm[i].start <= c && c <= f.cm[i].end {
-			if f.cm[i].offset == 0 {
-				return Index(c + f.cm[i].delta)
-			}
-			offset := int(f.cm[i].offset) + 2*(i-n+int(c-f.cm[i].start))
+	c := uint32(x)
+	for i, j := 0, len(f.cm); i < j; {
+		h := i + (j-i)/2
+		cm := &f.cm[h]
+		if c < cm.start {
+			j = h
+		} else if cm.end < c {
+			i = h + 1
+		} else if cm.offset == 0 {
+			return Index(c + cm.delta)
+		} else {
+			offset := int(cm.offset) + 2*(h-len(f.cm)+int(c-cm.start))
 			return Index(u16(f.cmapIndexes, offset))
 		}
 	}
 	return 0
 }
 
-// HMetric returns the horizontal metrics for the glyph with the given index.
-func (f *Font) HMetric(scale int32, i Index) (h HMetric) {
+// unscaledHMetric returns the unscaled horizontal metrics for the glyph with
+// the given index.
+func (f *Font) unscaledHMetric(i Index) (h HMetric) {
 	j := int(i)
-	if j >= f.nGlyph {
+	if j < 0 || f.nGlyph <= j {
 		return HMetric{}
 	}
 	if j >= f.nHMetric {
 		p := 4 * (f.nHMetric - 1)
-		h.AdvanceWidth = int32(u16(f.hmtx, p))
-		h.LeftSideBearing = int32(int16(u16(f.hmtx, p+2*(j-f.nHMetric)+4)))
-	} else {
-		h.AdvanceWidth = int32(u16(f.hmtx, 4*j))
-		h.LeftSideBearing = int32(int16(u16(f.hmtx, 4*j+2)))
+		return HMetric{
+			AdvanceWidth:    int32(u16(f.hmtx, p)),
+			LeftSideBearing: int32(int16(u16(f.hmtx, p+2*(j-f.nHMetric)+4))),
+		}
 	}
+	return HMetric{
+		AdvanceWidth:    int32(u16(f.hmtx, 4*j)),
+		LeftSideBearing: int32(int16(u16(f.hmtx, 4*j+2))),
+	}
+}
+
+// HMetric returns the horizontal metrics for the glyph with the given index.
+func (f *Font) HMetric(scale int32, i Index) HMetric {
+	h := f.unscaledHMetric(i)
 	h.AdvanceWidth = f.scale(scale * h.AdvanceWidth)
 	h.LeftSideBearing = f.scale(scale * h.LeftSideBearing)
 	return h
+}
+
+// unscaledVMetric returns the unscaled vertical metrics for the glyph with
+// the given index. yMax is the top of the glyph's bounding box.
+func (f *Font) unscaledVMetric(i Index, yMax int32) (v VMetric) {
+	j := int(i)
+	if j < 0 || f.nGlyph <= j {
+		return VMetric{}
+	}
+	if 4*j+4 <= len(f.vmtx) {
+		return VMetric{
+			AdvanceHeight:  int32(u16(f.vmtx, 4*j)),
+			TopSideBearing: int32(int16(u16(f.vmtx, 4*j+2))),
+		}
+	}
+	// The OS/2 table has grown over time.
+	// https://developer.apple.com/fonts/TTRefMan/RM06/Chap6OS2.html
+	// says that it was originally 68 bytes. Optional fields, including
+	// the ascender and descender, are described at
+	// http://www.microsoft.com/typography/otspec/os2.htm
+	if len(f.os2) >= 72 {
+		sTypoAscender := int32(int16(u16(f.os2, 68)))
+		sTypoDescender := int32(int16(u16(f.os2, 70)))
+		return VMetric{
+			AdvanceHeight:  sTypoAscender - sTypoDescender,
+			TopSideBearing: sTypoAscender - yMax,
+		}
+	}
+	return VMetric{
+		AdvanceHeight:  f.fUnitsPerEm,
+		TopSideBearing: 0,
+	}
+}
+
+// VMetric returns the vertical metrics for the glyph with the given index.
+func (f *Font) VMetric(scale int32, i Index) VMetric {
+	// TODO: should 0 be bounds.YMax?
+	v := f.unscaledVMetric(i, 0)
+	v.AdvanceHeight = f.scale(scale * v.AdvanceHeight)
+	v.TopSideBearing = f.scale(scale * v.TopSideBearing)
+	return v
 }
 
 // Kerning returns the kerning for the given glyph pair.
@@ -411,8 +502,14 @@ func parse(ttf []byte, offset int) (font *Font, err error) {
 		switch string(ttf[x : x+4]) {
 		case "cmap":
 			f.cmap, err = readTable(ttf, ttf[x+8:x+16])
+		case "cvt ":
+			f.cvt, err = readTable(ttf, ttf[x+8:x+16])
+		case "fpgm":
+			f.fpgm, err = readTable(ttf, ttf[x+8:x+16])
 		case "glyf":
 			f.glyf, err = readTable(ttf, ttf[x+8:x+16])
+		case "hdmx":
+			f.hdmx, err = readTable(ttf, ttf[x+8:x+16])
 		case "head":
 			f.head, err = readTable(ttf, ttf[x+8:x+16])
 		case "hhea":
@@ -425,6 +522,12 @@ func parse(ttf []byte, offset int) (font *Font, err error) {
 			f.loca, err = readTable(ttf, ttf[x+8:x+16])
 		case "maxp":
 			f.maxp, err = readTable(ttf, ttf[x+8:x+16])
+		case "OS/2":
+			f.os2, err = readTable(ttf, ttf[x+8:x+16])
+		case "prep":
+			f.prep, err = readTable(ttf, ttf[x+8:x+16])
+		case "vmtx":
+			f.vmtx, err = readTable(ttf, ttf[x+8:x+16])
 		}
 		if err != nil {
 			return
