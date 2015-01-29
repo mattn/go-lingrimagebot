@@ -24,7 +24,7 @@ import (
 var reToken = regexp.MustCompile(`^!!(image|image_p)\s((?:.|\n)*)`)
 var reKomei = regexp.MustCompile(`^!(komei)\s((?:.|\n)*)`)
 var reYuno = regexp.MustCompile(`^!(yuno)\s((?:.|\n)*)`)
-var reDeris = regexp.MustCompile(`^!(deris)\s((?:.|\n)*)`)
+var reDeris = regexp.MustCompile(`^!(d(?:eris)?|redis)\s((?:.|\n)*)`)
 var reGolgo = regexp.MustCompile(`^!(golgo)\s((?:.|\n)*)`)
 
 type Status struct {
