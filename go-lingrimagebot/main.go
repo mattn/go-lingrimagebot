@@ -115,7 +115,7 @@ func init() {
 				results := ""
 				for _, event := range status.Events {
 					tokens := reToken.FindStringSubmatch(event.Message.Text)
-					if len(tokens) == 3 && (tokens[1] == "image" || tokens[1] == "image_p") {
+					if len(tokens) == 3 {
 						lines := strings.Split(tokens[2], "\n")
 						maxWidth := 0
 						for _, line := range lines {
@@ -191,7 +191,7 @@ func init() {
 					}
 
 					tokens = reKomei.FindStringSubmatch(event.Message.Text)
-					if len(tokens) == 3 && tokens[1] == "komei" {
+					if len(tokens) == 3 {
 						lines := strings.Split(strings.Replace(tokens[2], "ー", "｜", -1), "\n")
 						pngf, _ := os.Open("image/komei.png")
 						pngi, _ := png.Decode(pngf)
@@ -205,7 +205,7 @@ func init() {
 						fc.SetDst(rgba)
 						fc.SetSrc(fg)
 
-						pt := freetype.Pt(pngi.Bounds().Dx() - 25, 20)
+						pt := freetype.Pt(pngi.Bounds().Dx()-25, 20)
 						for _, line := range lines {
 							for _, r := range []rune(line) {
 								_, err = fc.DrawString(string(r), pt)
@@ -261,7 +261,7 @@ func init() {
 					}
 
 					tokens = reYuno.FindStringSubmatch(event.Message.Text)
-					if len(tokens) == 3 && tokens[1] == "yuno" {
+					if len(tokens) == 3 {
 						lines := strings.Split(tokens[2], "\n")
 						pngf, _ := os.Open("image/yuno.png")
 						pngi, _ := png.Decode(pngf)
@@ -328,7 +328,7 @@ func init() {
 					}
 
 					tokens = reDeris.FindStringSubmatch(event.Message.Text)
-					if len(tokens) == 3 && tokens[1] == "deris" {
+					if len(tokens) == 3 {
 						lines := strings.Split(tokens[2], "\n")
 						maxWidth := 0
 						for _, line := range lines {
@@ -337,7 +337,7 @@ func init() {
 								maxWidth = width
 							}
 						}
-						width := maxWidth*11+80
+						width := maxWidth*11 + 80
 						if width < 200 {
 							width = 200
 						}
@@ -417,7 +417,7 @@ func init() {
 					}
 
 					tokens = reGolgo.FindStringSubmatch(event.Message.Text)
-					if len(tokens) == 3 && tokens[1] == "golgo" {
+					if len(tokens) == 3 {
 						lines := strings.Split(strings.Replace(tokens[2], "ー", "｜", -1), "\n")
 						pngf, _ := os.Open("image/golgo.png")
 						pngi, _ := png.Decode(pngf)
@@ -431,7 +431,7 @@ func init() {
 						fc.SetDst(rgba)
 						fc.SetSrc(fg)
 
-						pt := freetype.Pt(pngi.Bounds().Dx() - 25, 25)
+						pt := freetype.Pt(pngi.Bounds().Dx()-25, 25)
 						for _, line := range lines {
 							for _, r := range []rune(line) {
 								_, err = fc.DrawString(string(r), pt)
