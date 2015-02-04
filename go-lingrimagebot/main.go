@@ -184,9 +184,8 @@ func init() {
 							}
 							gyazoUrl := string(content)
 							if len(gyazoUrl) > 4 && gyazoUrl[:5] == "http:" {
-								gyazoUrl += ".png"
+								results += gyazoUrl + ".png\n"
 							}
-							results += gyazoUrl + "\n"
 						}
 					}
 
@@ -254,9 +253,8 @@ func init() {
 							}
 							gyazoUrl := string(content)
 							if len(gyazoUrl) > 4 && gyazoUrl[:5] == "http:" {
-								gyazoUrl += ".png"
+								results += gyazoUrl + ".png\n"
 							}
-							results += gyazoUrl + "\n"
 						}
 					}
 
@@ -321,9 +319,8 @@ func init() {
 							}
 							gyazoUrl := string(content)
 							if len(gyazoUrl) > 4 && gyazoUrl[:5] == "http:" {
-								gyazoUrl += ".png"
+								results += gyazoUrl + ".png\n"
 							}
-							results += gyazoUrl + "\n"
 						}
 					}
 
@@ -410,9 +407,8 @@ func init() {
 							}
 							gyazoUrl := string(content)
 							if len(gyazoUrl) > 4 && gyazoUrl[:5] == "http:" {
-								gyazoUrl += ".png"
+								results += gyazoUrl + ".png\n"
 							}
-							results += gyazoUrl + "\n"
 						}
 					}
 
@@ -480,9 +476,8 @@ func init() {
 							}
 							gyazoUrl := string(content)
 							if len(gyazoUrl) > 4 && gyazoUrl[:5] == "http:" {
-								gyazoUrl += ".png"
+								results += gyazoUrl + ".png\n"
 							}
-							results += gyazoUrl + "\n"
 						}
 					}
 				}
