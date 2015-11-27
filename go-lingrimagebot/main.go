@@ -406,7 +406,7 @@ func imageSeikai(lines []string) ([]byte, string, error) {
 	fc.SetDst(rgba)
 	fc.SetSrc(image.Black)
 
-	pt := freetype.Pt(50, pngi.Bounds().Dy()-30)
+	pt := freetype.Pt(80, pngi.Bounds().Dy()-30)
 	for _, line := range lines {
 		_, err := fc.DrawString(line, pt)
 		if err != nil {
