@@ -28,7 +28,7 @@ var reKomei = regexp.MustCompile(`^!(komei)\s((?:.|\n)*)`)
 var reYuno = regexp.MustCompile(`^!(yuno)\s((?:.|\n)*)`)
 var reDeris = regexp.MustCompile(`^!(d(?:eris)?|redis)\s((?:.|\n)*)`)
 var reGolgo = regexp.MustCompile(`^!(golgo)\s((?:.|\n)*)`)
-var reMig = regexp.MustCompile(`^!(mig)\s((?:.|\n)*)`)
+var reSeikai = regexp.MustCompile(`^!(seikai)\s((?:.|\n)*)`)
 
 type Status struct {
 	Events []Event `json:"events"`
@@ -393,8 +393,8 @@ func imageGolgo(lines []string) ([]byte, string, error) {
 	return b.Bytes(), mp.FormDataContentType(), nil
 }
 
-func imageMig(lines []string) ([]byte, string, error) {
-	pngf, _ := os.Open("image/mig.png")
+func imageSeikai(lines []string) ([]byte, string, error) {
+	pngf, _ := os.Open("image/Seikai.png")
 	pngi, _ := png.Decode(pngf)
 	rgba := image.NewRGBA(image.Rect(0, 0, pngi.Bounds().Dx(), pngi.Bounds().Dy()))
 	draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
@@ -406,17 +406,13 @@ func imageMig(lines []string) ([]byte, string, error) {
 	fc.SetDst(rgba)
 	fc.SetSrc(image.Black)
 
-	pt := freetype.Pt(pngi.Bounds().Dx()-25, 25)
+	pt := freetype.Pt(50, pngi.Bounds().Dy()-30)
 	for _, line := range lines {
-		for _, r := range []rune(line) {
-			_, err := fc.DrawString(string(r), pt)
-			if err != nil {
-				return nil, "", err
-			}
-			pt.Y += fc.PointToFix32(11 * 1.8)
+		_, err := fc.DrawString(line, pt)
+		if err != nil {
+			return nil, "", err
 		}
-		pt.Y = fc.PointToFix32(25)
-		pt.X -= fc.PointToFix32(11 * 1.8)
+		pt.Y += fc.PointToFix32(11 * 1.8)
 	}
 
 	var b bytes.Buffer
@@ -492,10 +488,11 @@ func init() {
 				}{
 					{reToken, false, imageNormal},
 					{reTokenP, false, imageNormalP},
-					{reYuno, false, imageYuno},
-					{reDeris, false, imageDeris},
-					{reGolgo, false, imageGolgo},
-					{reMig, false, imageMig},
+					{reKomei, true, imageKomei},
+					{reYuno, true, imageYuno},
+					{reDeris, true, imageDeris},
+					{reGolgo, true, imageGolgo},
+					{reSeikai, true, imageSeikai},
 				}
 				for _, event := range status.Events {
 					for _, t := range tables {
