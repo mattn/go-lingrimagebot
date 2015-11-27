@@ -394,7 +394,7 @@ func imageGolgo(lines []string) ([]byte, string, error) {
 }
 
 func imageSeikai(lines []string) ([]byte, string, error) {
-	pngf, _ := os.Open("image/Seikai.png")
+	pngf, _ := os.Open("image/seikai.png")
 	pngi, _ := png.Decode(pngf)
 	rgba := image.NewRGBA(image.Rect(0, 0, pngi.Bounds().Dx(), pngi.Bounds().Dy()))
 	draw.Draw(rgba, rgba.Bounds(), pngi, image.ZP, draw.Src)
