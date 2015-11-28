@@ -4,9 +4,6 @@ import (
 	"appengine"
 	"appengine/urlfetch"
 	"bytes"
-	"code.google.com/p/draw2d/draw2d"
-	"code.google.com/p/freetype-go/freetype"
-	"code.google.com/p/freetype-go/freetype/truetype"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -20,6 +17,10 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"code.google.com/p/draw2d/draw2d"
+	"code.google.com/p/freetype-go/freetype"
+	"code.google.com/p/freetype-go/freetype/truetype"
 )
 
 var reToken = regexp.MustCompile(`^!(image)\s((?:.|\n)*)`)
@@ -74,6 +75,28 @@ func strWidth(str string) int {
 	return r
 }
 
+func makedata(rgba *image.RGBA) ([]byte, string, error) {
+	var b bytes.Buffer
+	mp := multipart.NewWriter(&b)
+	err := mp.WriteField("id", time.Now().Format("20060102030405"))
+	if err != nil {
+		return nil, "", err
+	}
+	part, err := mp.CreateFormFile("imagedata", "foo")
+	if err != nil {
+		return nil, "", err
+	}
+	err = png.Encode(part, rgba)
+	if err != nil {
+		return nil, "", err
+	}
+	err = mp.Close()
+	if err != nil {
+		return nil, "", err
+	}
+	return b.Bytes(), mp.FormDataContentType(), nil
+}
+
 func upload(c appengine.Context, b []byte, ct string) (string, error) {
 	u := urlfetch.Client(c)
 	res, err := u.Post("http://gyazo.com/upload.cgi", ct, bytes.NewReader(b))
@@ -122,25 +145,7 @@ func imageNormal(lines []string) ([]byte, string, error) {
 		pt.Y += fc.PointToFix32(11 * 1.8)
 	}
 
-	var b bytes.Buffer
-	mp := multipart.NewWriter(&b)
-	err := mp.WriteField("id", time.Now().Format("20060102030405"))
-	if err != nil {
-		return nil, "", err
-	}
-	part, err := mp.CreateFormFile("imagedata", "foo")
-	if err != nil {
-		return nil, "", err
-	}
-	err = png.Encode(part, rgba)
-	if err != nil {
-		return nil, "", err
-	}
-	err = mp.Close()
-	if err != nil {
-		return nil, "", err
-	}
-	return b.Bytes(), mp.FormDataContentType(), nil
+	return makedata(rgba)
 }
 
 func imageNormalP(lines []string) ([]byte, string, error) {
@@ -170,25 +175,7 @@ func imageNormalP(lines []string) ([]byte, string, error) {
 		pt.Y += fc.PointToFix32(11 * 1.8)
 	}
 
-	var b bytes.Buffer
-	mp := multipart.NewWriter(&b)
-	err := mp.WriteField("id", time.Now().Format("20060102030405"))
-	if err != nil {
-		return nil, "", err
-	}
-	part, err := mp.CreateFormFile("imagedata", "foo")
-	if err != nil {
-		return nil, "", err
-	}
-	err = png.Encode(part, rgba)
-	if err != nil {
-		return nil, "", err
-	}
-	err = mp.Close()
-	if err != nil {
-		return nil, "", err
-	}
-	return b.Bytes(), mp.FormDataContentType(), nil
+	return makedata(rgba)
 }
 
 func imageKomei(lines []string) ([]byte, string, error) {
@@ -217,25 +204,7 @@ func imageKomei(lines []string) ([]byte, string, error) {
 		pt.X -= fc.PointToFix32(11 * 1.8)
 	}
 
-	var b bytes.Buffer
-	mp := multipart.NewWriter(&b)
-	err := mp.WriteField("id", time.Now().Format("20060102030405"))
-	if err != nil {
-		return nil, "", err
-	}
-	part, err := mp.CreateFormFile("imagedata", "foo")
-	if err != nil {
-		return nil, "", err
-	}
-	err = png.Encode(part, rgba)
-	if err != nil {
-		return nil, "", err
-	}
-	err = mp.Close()
-	if err != nil {
-		return nil, "", err
-	}
-	return b.Bytes(), mp.FormDataContentType(), nil
+	return makedata(rgba)
 }
 
 func imageYuno(lines []string) ([]byte, string, error) {
@@ -260,25 +229,7 @@ func imageYuno(lines []string) ([]byte, string, error) {
 		pt.Y += fc.PointToFix32(22 * 1.8)
 	}
 
-	var b bytes.Buffer
-	mp := multipart.NewWriter(&b)
-	err := mp.WriteField("id", time.Now().Format("20060102030405"))
-	if err != nil {
-		return nil, "", err
-	}
-	part, err := mp.CreateFormFile("imagedata", "foo")
-	if err != nil {
-		return nil, "", err
-	}
-	err = png.Encode(part, rgba)
-	if err != nil {
-		return nil, "", err
-	}
-	err = mp.Close()
-	if err != nil {
-		return nil, "", err
-	}
-	return b.Bytes(), mp.FormDataContentType(), nil
+	return makedata(rgba)
 }
 
 func imageDeris(lines []string) ([]byte, string, error) {
@@ -325,25 +276,7 @@ func imageDeris(lines []string) ([]byte, string, error) {
 		pt.Y += fc.PointToFix32(11 * 1.8)
 	}
 
-	var b bytes.Buffer
-	mp := multipart.NewWriter(&b)
-	err := mp.WriteField("id", time.Now().Format("20060102030405"))
-	if err != nil {
-		return nil, "", err
-	}
-	part, err := mp.CreateFormFile("imagedata", "foo")
-	if err != nil {
-		return nil, "", err
-	}
-	err = png.Encode(part, rgba)
-	if err != nil {
-		return nil, "", err
-	}
-	err = mp.Close()
-	if err != nil {
-		return nil, "", err
-	}
-	return b.Bytes(), mp.FormDataContentType(), nil
+	return makedata(rgba)
 }
 
 func imageGolgo(lines []string) ([]byte, string, error) {
@@ -372,25 +305,7 @@ func imageGolgo(lines []string) ([]byte, string, error) {
 		pt.X -= fc.PointToFix32(11 * 1.8)
 	}
 
-	var b bytes.Buffer
-	mp := multipart.NewWriter(&b)
-	err := mp.WriteField("id", time.Now().Format("20060102030405"))
-	if err != nil {
-		return nil, "", err
-	}
-	part, err := mp.CreateFormFile("imagedata", "foo")
-	if err != nil {
-		return nil, "", err
-	}
-	err = png.Encode(part, rgba)
-	if err != nil {
-		return nil, "", err
-	}
-	err = mp.Close()
-	if err != nil {
-		return nil, "", err
-	}
-	return b.Bytes(), mp.FormDataContentType(), nil
+	return makedata(rgba)
 }
 
 func imageSeikai(lines []string) ([]byte, string, error) {
@@ -415,25 +330,7 @@ func imageSeikai(lines []string) ([]byte, string, error) {
 		pt.Y += fc.PointToFix32(11 * 1.8)
 	}
 
-	var b bytes.Buffer
-	mp := multipart.NewWriter(&b)
-	err := mp.WriteField("id", time.Now().Format("20060102030405"))
-	if err != nil {
-		return nil, "", err
-	}
-	part, err := mp.CreateFormFile("imagedata", "foo")
-	if err != nil {
-		return nil, "", err
-	}
-	err = png.Encode(part, rgba)
-	if err != nil {
-		return nil, "", err
-	}
-	err = mp.Close()
-	if err != nil {
-		return nil, "", err
-	}
-	return b.Bytes(), mp.FormDataContentType(), nil
+	return makedata(rgba)
 }
 
 var (
