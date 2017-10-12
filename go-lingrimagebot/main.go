@@ -1,8 +1,6 @@
 package lingrimagebot
 
 import (
-	"appengine"
-	"appengine/urlfetch"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -17,6 +15,9 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"appengine"
+	"appengine/urlfetch"
 
 	"code.google.com/p/draw2d/draw2d"
 	"code.google.com/p/freetype-go/freetype"
@@ -82,7 +83,7 @@ func makedata(rgba *image.RGBA) ([]byte, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	part, err := mp.CreateFormFile("imagedata", "foo")
+	part, err := mp.CreateFormFile("imagedata", "upload.gyazo.com")
 	if err != nil {
 		return nil, "", err
 	}
@@ -98,8 +99,13 @@ func makedata(rgba *image.RGBA) ([]byte, string, error) {
 }
 
 func upload(c appengine.Context, b []byte, ct string) (string, error) {
-	u := urlfetch.Client(c)
-	res, err := u.Post("http://gyazo.com/upload.cgi", ct, bytes.NewReader(b))
+	req, err := http.NewRequest("POST", "https://upload.gyazo.com/upload.cgi", bytes.NewReader(b))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", ct)
+	req.Header.Set("User-Agent", "Gyagowin/1.0")
+	res, err := urlfetch.Client(c).Do(req)
 	if err != nil {
 		return "", err
 	}
